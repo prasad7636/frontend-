@@ -5,6 +5,10 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 const { createClient } = supabase;
 const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+const BACKEND_URL = window.location.hostname === "localhost"
+  ? "http://localhost:5000"
+  : "https://medical-reco-backend.onrender.com";
+
 let currentUser = null;
 let savedReports = [];
 const symptoms = [];
@@ -185,7 +189,7 @@ function showHome() {
 
 function showToast(message, type = 'info') {
   const toast = document.createElement('div');
-  toast.style.cssText = `position: fixed; top: 20px; right: 20px; padding: 12px 24px; background-color: ${type === 'error' ? '#ef4444' : type === 'success' ? '#10b981' : '#3b82f6'}; color: white; border-radius: 6px; z-index: 1000; font-weight: 500; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);`;
+  toast.style.cssText = position: fixed; top: 20px; right: 20px; padding: 12px 24px; background-color: ${type === 'error' ? '#ef4444' : type === 'success' ? '#10b981' : '#3b82f6'}; color: white; border-radius: 6px; z-index: 1000; font-weight: 500; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);;
   toast.textContent = message;
   document.body.appendChild(toast);
   setTimeout(() => toast.remove(), 3000);
@@ -271,7 +275,7 @@ async function analyzeSymptoms() {
   showToast('Analyzing symptoms...', 'info');
 
   try {
-    const response = await fetch('http://localhost:5000/predict', {
+    const response = await fetch(${BACKEND_URL}/predict, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ symptoms })
@@ -289,7 +293,7 @@ async function analyzeSymptoms() {
     // Helper to make numbered lists from arrays
     const makeNumberedList = (arr) =>
       Array.isArray(arr) && arr.length > 0
-        ? arr.map((item, i) => `${i + 1}. ${item}`).join('<br>')
+        ? arr.map((item, i) => ${i + 1}. ${item}).join('<br>')
         : 'Not available';
 
     const reportFields = [
@@ -385,7 +389,7 @@ function renderSavedReports() {
     return;
   }
 
-  console.log("🗑️ Deleting report with ID:", reportId);
+  console.log("🗑 Deleting report with ID:", reportId);
   deleteReport(reportId);
   console.log("Rendered report IDs:", savedReports.map(r => r[6]));
 
@@ -397,9 +401,9 @@ function renderSavedReports() {
       '🩺 Predicted Disease',
       '📜 Description',
       '💊 Medications',
-      '🍽️ Diets',
-      '⚠️ Precautions',
-      '🏋️ Workouts'
+      '🍽 Diets',
+      '⚠ Precautions',
+      '🏋 Workouts'
     ];
 
     report.slice(0, 6).forEach((text, idx) => {
@@ -413,7 +417,7 @@ function renderSavedReports() {
           .join('<br>');
       }
 
-      section.innerHTML = `<h3 class="report-heading text-lg mb-1">${headings[idx]}</h3><p class="report-text">${formattedText}</p>`;
+      section.innerHTML = <h3 class="report-heading text-lg mb-1">${headings[idx]}</h3><p class="report-text">${formattedText}</p>;
       card.appendChild(section);
     });
 
@@ -479,7 +483,3 @@ async function deleteReport(reportId) {
     fetchSavedReports(); // Refresh the list
   }
 }
-
-
-
-
