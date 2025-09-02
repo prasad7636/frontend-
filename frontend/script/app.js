@@ -1,14 +1,15 @@
+// ===================== Supabase Config =====================
 const SUPABASE_URL = 'https://gcbijznnberhhumqyzua.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdjYmlqem5uYmVyaGh1bXF5enVhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE1NTMzNzEsImV4cCI6MjA2NzEyOTM3MX0.AIvOmlHuUihBrZyww98M4Ktz4TE-MmuM2OE3HBiwSmA';
-
 
 const { createClient } = supabase;
 const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-const BACKEND_URL = window.location.hostname === "localhost"
-  ? "http://localhost:5000"
-  : "https://mini-project-cai-5l66.onrender.com";
+// ===================== Backend Config =====================
+// 👇 Always use your deployed backend
+const BACKEND_URL = "https://mini-project-cai-5l66.onrender.com";
 
+// ===================== Global Variables =====================
 let currentUser = null;
 let savedReports = [];
 const symptoms = [];
@@ -18,7 +19,9 @@ const commonSymptoms = [
   'sore_throat', 'body_pain', 'nausea', 'vomiting', 'diarrhoea', 'continuous_sneezing', 'shivering', 'joint_pain', 'stomach_pain', 'acidity', 'weight_gain'
 ];
 
+// ===================== DOM Ready =====================
 window.addEventListener('DOMContentLoaded', () => {
+  // Mobile menu toggle
   const menuToggle = document.getElementById('menu-toggle');
   const mobileMenu = document.getElementById('mobile-menu');
   const menuIcon = document.getElementById('menu-icon');
@@ -29,6 +32,7 @@ window.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // Common symptoms badges
   const commonSymptomsContainer = document.getElementById('common-symptoms');
   if (commonSymptomsContainer) {
     commonSymptoms.forEach(symptom => {
@@ -42,6 +46,7 @@ window.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // Modals
   ['login-link', 'mobile-login-link'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.addEventListener('click', () => openModal('login-modal'));
@@ -51,6 +56,7 @@ window.addEventListener('DOMContentLoaded', () => {
     if (el) el.addEventListener('click', () => openModal('signup-modal'));
   });
 
+  // Smooth scroll
   document.querySelectorAll('a[href^="#"]').forEach(link => {
     link.addEventListener('click', e => {
       const target = document.querySelector(link.getAttribute('href'));
@@ -61,6 +67,7 @@ window.addEventListener('DOMContentLoaded', () => {
     });
   });
 
+  // Profile/Dashboard links
   document.querySelectorAll('#mobile-profile-link a[href="#profile"]').forEach(link => {
     link.addEventListener('click', e => {
       e.preventDefault();
@@ -73,11 +80,8 @@ window.addEventListener('DOMContentLoaded', () => {
     link.addEventListener('click', e => {
       e.preventDefault();
       showProfile();
-
     });
   });
-
-
   document.querySelectorAll('#profile-link a[href="#dashboard"]').forEach(link => {
     link.addEventListener('click', e => {
       e.preventDefault();
@@ -93,6 +97,7 @@ window.addEventListener('DOMContentLoaded', () => {
     });
   });
 
+  // Auto-login session check
   supabaseClient.auth.getSession().then(({ data }) => {
     if (data?.session) {
       currentUser = data.session.user;
@@ -103,6 +108,7 @@ window.addEventListener('DOMContentLoaded', () => {
   });
 });
 
+// ===================== Auth Functions =====================
 function openModal(id) {
   document.getElementById(id).style.display = 'flex';
 }
@@ -139,17 +145,8 @@ async function handleLogin() {
 
   currentUser = data.user;
 
-  // ✅ Hide the login modal
   closeModal('login-modal');
-
   onLogin();
-}
-
-
-function onLogin() {
-  showToast('Login successful', 'success');
-  document.getElementById('profile-email').textContent = currentUser.email;
-  showDashboard();
 }
 
 async function handleLogout() {
@@ -159,6 +156,14 @@ async function handleLogout() {
   showHome();
 }
 
+function onLogin() {
+  showToast('Login successful', 'success');
+  document.getElementById('profile-email').textContent = currentUser.email;
+  fetchSavedReports(); // ✅ fetch saved reports immediately
+  showDashboard();
+}
+
+// ===================== Navigation =====================
 function showDashboard() {
   ['home', 'about', 'how-it-works', 'contact', 'report-info', 'prediction-info', 'health-journey', 'profile'].forEach(id => document.getElementById(id)?.classList.add('hidden'));
   document.getElementById('dashboard').classList.remove('hidden');
@@ -166,17 +171,12 @@ function showDashboard() {
   document.getElementById('mobile-auth-links').classList.add('hidden');
   document.getElementById('profile-link').classList.remove('hidden');
   document.getElementById('mobile-profile-link').classList.remove('hidden');
-  const cancelBtn = document.getElementById('cancel-edit');
-  if (cancelBtn) cancelBtn.remove();
-  const editForm = document.getElementById('edit-details-form');
-  if (editForm) editForm.classList.add('hidden');
 }
 
 function showProfile() {
   document.getElementById('dashboard')?.classList.add('hidden');
   document.getElementById('profile')?.classList.remove('hidden');
 }
-
 
 function showHome() {
   ['home', 'about', 'how-it-works', 'contact', 'report-info', 'prediction-info', 'health-journey'].forEach(id => document.getElementById(id)?.classList.remove('hidden'));
@@ -187,6 +187,7 @@ function showHome() {
   document.getElementById('mobile-profile-link').classList.add('hidden');
 }
 
+// ===================== Toast =====================
 function showToast(message, type = 'info') {
   const toast = document.createElement('div');
   toast.style.cssText = position: fixed; top: 20px; right: 20px; padding: 12px 24px; background-color: ${type === 'error' ? '#ef4444' : type === 'success' ? '#10b981' : '#3b82f6'}; color: white; border-radius: 6px; z-index: 1000; font-weight: 500; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);;
@@ -195,31 +196,7 @@ function showToast(message, type = 'info') {
   setTimeout(() => toast.remove(), 3000);
 }
 
-function toggleEditForm() {
-  const form = document.getElementById('edit-details-form');
-  if (!form) return;
-
-  if (form.classList.contains('hidden')) {
-    form.classList.remove('hidden');
-    if (!document.getElementById('cancel-edit')) {
-      const cancelBtn = document.createElement('button');
-      cancelBtn.textContent = 'Cancel';
-      cancelBtn.id = 'cancel-edit';
-      cancelBtn.className = 'ml-2 px-6 mr-2 py-2 bg-red-500 text-white rounded logout-btn';
-      cancelBtn.onclick = () => {
-        form.classList.add('hidden');
-        cancelBtn.remove();
-      };
-      form.parentNode.insertBefore(cancelBtn, form.nextSibling);
-    }
-  } else {
-    form.classList.add('hidden');
-    const cancelBtn = document.getElementById('cancel-edit');
-    if (cancelBtn) cancelBtn.remove();
-  }
-}
-
-// ✅ Symptom Handling
+// ===================== Symptom Handling =====================
 function addSymptom() {
   const input = document.getElementById('symptom-input');
   const value = input.value.trim();
@@ -254,7 +231,6 @@ function renderSymptoms() {
   document.getElementById('reset-btn').disabled = symptoms.length === 0;
 }
 
-
 function removeSymptom(symptom) {
   const index = symptoms.indexOf(symptom);
   if (index !== -1) {
@@ -268,6 +244,7 @@ function resetForm() {
   renderSymptoms();
 }
 
+// ===================== Analyze Symptoms =====================
 async function analyzeSymptoms() {
   if (symptoms.length === 0) return;
 
@@ -281,6 +258,8 @@ async function analyzeSymptoms() {
       body: JSON.stringify({ symptoms })
     });
 
+    if (!response.ok) throw new Error(HTTP error! Status: ${response.status});
+
     const data = await response.json();
 
     if (data.error) {
@@ -290,7 +269,6 @@ async function analyzeSymptoms() {
 
     const { disease, description, medications, diets, precautions, workouts } = data;
 
-    // Helper to make numbered lists from arrays
     const makeNumberedList = (arr) =>
       Array.isArray(arr) && arr.length > 0
         ? arr.map((item, i) => ${i + 1}. ${item}).join('<br>')
@@ -317,7 +295,7 @@ async function analyzeSymptoms() {
   }
 }
 
-
+// ===================== Save Reports =====================
 async function saveHealthReport() {
   const [disease, description, medications, diets, precautions, workouts] = Array.from(document.querySelectorAll('.report-text')).map(el => el.textContent.trim());
 
@@ -326,7 +304,6 @@ async function saveHealthReport() {
     return;
   }
 
-  // Save to Supabase and get inserted data (including ID)
   const { data, error } = await supabaseClient
     .from('Reports')
     .insert([
@@ -340,7 +317,7 @@ async function saveHealthReport() {
         user_id: currentUser.id
       }
     ])
-    .select();  // 👈 This fetches the inserted report(s) with their UUID
+    .select();
 
   if (error) {
     showToast('Failed to save to database', 'error');
@@ -348,9 +325,7 @@ async function saveHealthReport() {
     return;
   }
 
-  const insertedReport = data[0]; // assuming only one is inserted
-
-  // ✅ Push with UUID into savedReports
+  const insertedReport = data[0];
   savedReports.push([
     insertedReport.disease,
     insertedReport.description,
@@ -358,42 +333,54 @@ async function saveHealthReport() {
     insertedReport.diets,
     insertedReport.precautions,
     insertedReport.workouts,
-    insertedReport.id // 👈 Needed for deletion!
+    insertedReport.id
   ]);
 
-  renderSavedReports(); // Refresh the UI
+  renderSavedReports();
   showToast('Your report is saved', 'success');
+}
+
+// ===================== Fetch & Render Reports =====================
+async function fetchSavedReports() {
+  if (!currentUser) return;
+
+  const { data, error } = await supabaseClient
+    .from('Reports')
+    .select('id, disease, description, medications, diets, precautions, workouts')
+    .eq('user_id', currentUser.id);
+
+  if (error) {
+    console.error('Error fetching saved reports:', error);
+    return;
+  }
+
+  savedReports = data.map(row => [
+    row.disease,
+    row.description,
+    row.medications,
+    row.diets,
+    row.precautions,
+    row.workouts,
+    row.id
+  ]);
+
+  renderSavedReports();
 }
 
 function renderSavedReports() {
   const container = document.getElementById('saved-reports-list');
   container.innerHTML = '';
 
-  savedReports.forEach((report, i) => {
+  savedReports.forEach((report) => {
     const card = document.createElement('div');
     card.className = 'report-card space-y-4 mb-6 relative';
 
     const unsaveBtn = document.createElement('button');
     unsaveBtn.className = 'absolute top-2 right-2 bg-red-600 text-white px-3 py-1 rounded';
     unsaveBtn.textContent = 'Unsave';
-   
-    unsaveBtn.classList.add('unsave-btn');
-    unsaveBtn.dataset.id = report[6]; // This is the ID (UUID)
+    unsaveBtn.dataset.id = report[6];
 
-   unsaveBtn.onclick = (event) => {
-  const reportId = event.target.dataset.id;
-
-  if (!reportId) {
-    console.error("❌ No report ID found on button");
-    showToast("❌ Missing report ID", "error");
-    return;
-  }
-
-  console.log("🗑 Deleting report with ID:", reportId);
-  deleteReport(reportId);
-  console.log("Rendered report IDs:", savedReports.map(r => r[6]));
-
-};
+    unsaveBtn.onclick = () => deleteReport(report[6]);
 
     card.appendChild(unsaveBtn);
 
@@ -410,7 +397,6 @@ function renderSavedReports() {
       const section = document.createElement('div');
       let formattedText = text;
 
-      // Only apply formatting for list-type sections
       if (idx >= 2) {
         formattedText = (text.match(/\d+\.\s.*?(?=\d+\.\s|$)/gs) || [text])
           .map(line => line.trim())
@@ -421,48 +407,11 @@ function renderSavedReports() {
       card.appendChild(section);
     });
 
-
     container.appendChild(card);
   });
 }
 
-async function fetchSavedReports() {
-  
-  if (!currentUser) return;
-
-  const { data, error } = await supabaseClient
-    .from('Reports')
-    .select('id, disease, description, medications, diets, precautions, workouts')
-
-    .eq('user_id', currentUser.id);
-    console.log("Fetched reports from DB:", data);
-
-
-  if (error) {
-    console.error('Error fetching saved reports:', error);
-    return;
-  }
-
-  savedReports = data.map(row => [
-    row.disease,
-    row.description,
-    row.medications,
-    row.diets,
-    row.precautions,
-    row.workouts,
-    row.id // needed for deletion
-  ]);
-
-  renderSavedReports(); 
-}
-
-
-function onLogin() {
-  showToast('Login successful', 'success');
-  document.getElementById('profile-email').textContent = currentUser.email;
-  fetchSavedReports(); // fetch reports from DB
-  showDashboard();
-}
+// ===================== Delete Report =====================
 async function deleteReport(reportId) {
   if (!reportId) {
     console.error("❌ No report ID passed to deleteReport()");
@@ -480,7 +429,6 @@ async function deleteReport(reportId) {
   } else {
     console.log("✅ Report deleted successfully:", reportId);
     showToast("✅ Report deleted", "success");
-    fetchSavedReports(); // Refresh the list
+    fetchSavedReports();
   }
 }
-
